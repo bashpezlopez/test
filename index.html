@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <?!= HtmlService.createHtmlOutputFromFile('functions').getContent(); ?>
+  <?!= HtmlService.createHtmlOutputFromFile('Styles').getContent(); ?>
+</head>
+<body>
+  <div class="sidebar">
+    <img src="placeholder.png" alt="Company Logo"> <!-- Image placeholder for company logo -->
+    <a href="https://script.google.com/macros/s/AKfycbxAex6rJ88Iy-IToyTHHz_Qn7PBwy0bNDj9Z7qN47s/dev" class="active" onclick="showSection('create-bill')">Create Bill</a>
+    <a href="https://script.google.com/macros/s/AKfycbxAex6rJ88Iy-IToyTHHz_Qn7PBwy0bNDj9Z7qN47s/dev/dashboard" onclick="showSection('dashboard')">Dashboard</a>
+  </div>
+  <div class="container">
+    <div id="create-bill" class="section">
+      <h1>Add Bill</h1>
+      <div class="section">
+        <h2>Customer Info</h2>
+        <form>
+          <div class="customer-info">
+            <div class="form-group">
+              <label for="customer_name">Customer Name:</label>
+              <input type="text" id="customer_name" name="customer_name">
+              <span id="customer_name-error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="customer_email">Customer Email:</label>
+              <input type="email" id="customer_email" name="customer_email">
+              <span id="customer_email-error" class="error-message"></span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <hr>
+
+      <div class="section">
+        <h2>Item Details</h2>
+        <div id="items-container">
+          <div class="item-row">
+            <div class="form-group">
+              <label for="item_name">Item Name:</label>
+              <select class="item_name" name="item_name">
+                <option value="" disabled selected>Select an item</option>
+              </select>
+              <span id="item_name-error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity:</label>
+              <input type="number" class="quantity" name="quantity">
+              <span id="quantity-error" class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="price">Price:</label>
+              <input type="number" class="price" name="price" readonly>
+              <span id="price-error" class="error-message"></span>
+            </div>
+            <button type="button" class="remove-item-button" onclick="removeItemRow(this)">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+        <button type="button" id="add-item-button">Add Another Item</button>
+      </div>
+
+      <hr>
+
+      <div id="total-summary" class="section">
+        <h2>Order Summary</h2>
+        <div id="summary-content"></div>
+      </div>
+
+      <div class="form-group">
+        <button type="button" id="add-bill-button" onclick="validateAndAddBill()">Add Bill</button>
+      </div>
+
+      <template id="item-row-template">
+        <div class="item-row">
+          <div class="form-group">
+            <label for="item_name">Item Name:</label>
+            <select class="item_name" name="item_name">
+              <option value="" disabled selected>Select an item</option>
+            </select>
+            <span id="item_name-error" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" class="quantity" name="quantity">
+            <span id="quantity-error" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" class="price" name="price" readonly>
+            <span id="price-error" class="error-message"></span>
+          </div>
+          <button type="button" class="remove-item-button" onclick="removeItemRow(this)">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <div id="dashboard" class="section" style="display: none;">
+      <h1>Dashboard</h1>
+      <iframe src="dashboard.html" style="width: 100%; height: 500px;"></iframe>
+    </div>
+
+</body>
+</html>
