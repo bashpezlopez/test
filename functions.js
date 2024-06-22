@@ -1,4 +1,4 @@
-<script>
+
     let inventoryData = [];
  
  
@@ -313,7 +313,3 @@
    });
    document.getElementById('add-item-button').addEventListener('click', addItemRow);
  };
- 
- 
- 
-   </script>
