@@ -1,12 +1,12 @@
 let inventoryData = [];
 
 function showSection(sectionId) {
-   document.getElementById('create-bill').style.display = 'none';
-   document.getElementById('dashboard').style.display = 'none';
-   document.getElementById(sectionId).style.display = 'block';
+  document.getElementById('create-bill').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById(sectionId).style.display = 'block';
 
-   document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-   document.querySelector(`.sidebar a[href='#${sectionId}']`).classList.add('active');
+  document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+  document.querySelector(`.sidebar a[href='#${sectionId}']`).classList.add('active');
 }
 
 function validateAndAddBill() {
@@ -79,12 +79,13 @@ function addBill() {
 
   console.log("Data to be added:", data); // Debugging line
 
-  google.script.run.withSuccessHandler(() => {
-    showSnackbar('Bill added successfully!');
-    clearForm();
-  }).withFailureHandler(error => {
-    console.error("Error adding bill:", error);
-  }).addBill(data);
+  // Add your Google Apps Script call here
+  // google.script.run.withSuccessHandler(() => {
+  //   showSnackbar('Bill added successfully!');
+  //   clearForm();
+  // }).withFailureHandler(error => {
+  //   console.error("Error adding bill:", error);
+  // }).addBill(data);
 }
 
 function clearForm() {
@@ -95,49 +96,11 @@ function clearForm() {
   updateTotalSummary();
 }
 
-function loadInventory(callback) {
-  google.script.run.withSuccessHandler(function(data) {
-    inventoryData = data;
-    if (callback) callback();
-  }).getInventory();
-}
-
-function getSelectedItems() {
-  const selectedItems = [];
-  document.querySelectorAll('.item_name').forEach(dropdown => {
-    const selectedItem = dropdown.value;
-    if (selectedItem) {
-      selectedItems.push(selectedItem);
-    }
-  });
-  return selectedItems;
-}
-
-function populateItemDropdown(dropdown, preserveSelection = false) {
-  const selectedItems = getSelectedItems();
-  const previousValue = dropdown.value;
-
-  dropdown.innerHTML = '<option value="" disabled selected>Select an item</option>';
-  inventoryData.forEach(row => {
-    if (!selectedItems.includes(row[1]) || row[1] === previousValue) {
-      const option = document.createElement('option');
-      option.value = row[1]; // ITEM_NAME
-      option.textContent = row[1]; // ITEM_NAME
-      dropdown.appendChild(option);
-    }
-  });
-
-  if (preserveSelection && previousValue) {
-    dropdown.value = previousValue;
-  }
-}
-
 function addItemRow() {
   const itemRowTemplate = document.getElementById('item-row-template').content.cloneNode(true);
   document.getElementById('items-container').appendChild(itemRowTemplate);
   const newRow = document.getElementById('items-container').lastElementChild;
-  populateItemDropdown(newRow.querySelector('.item_name'), true);
-  addEventListeners();
+  addEventListeners(newRow);
   toggleRemoveButtons();
   updateTotalSummary();
 }
@@ -148,9 +111,6 @@ function removeItemRow(button) {
     button.closest('.item-row').remove();
     toggleRemoveButtons();
     updateTotalSummary();
-    document.querySelectorAll('.item_name').forEach(dropdown => {
-      populateItemDropdown(dropdown, true);
-    });
   } else {
     alert('At least one item is required.');
   }
@@ -171,18 +131,15 @@ function toggleRemoveButtons() {
 function updatePriceAndTotal(row) {
   const selectedItem = row.querySelector('.item_name').value;
   const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
-  const item = inventoryData.find(row => row[1] === selectedItem); // Find selected item in inventory
-  if (item) {
-    const price = parseFloat(item[3]) || 0; // PRICE
-    const priceField = row.querySelector('.price');
-    if (priceField) {
-      priceField.value = price;
-    }
-    const total = quantity * price;
-    const totalField = row.querySelector('.total');
-    if (totalField) {
-      totalField.value = total;
-    }
+  const price = 10; // Example price, replace with actual price from inventory data
+  const priceField = row.querySelector('.price');
+  if (priceField) {
+    priceField.value = price;
+  }
+  const total = quantity * price;
+  const totalField = row.querySelector('.total');
+  if (totalField) {
+    totalField.value = total;
   }
   updateTotalSummary();
 }
@@ -208,106 +165,18 @@ function updateTotalSummary() {
   summaryContent.appendChild(grandTotalSummary);
 }
 
-function addEventListeners() {
-  document.querySelectorAll('.item_name').forEach(dropdown => {
-    dropdown.addEventListener('change', function() {
-      updatePriceAndTotal(dropdown.closest('.item-row'));
-    });
+function addEventListeners(row) {
+  row.querySelector('.item_name').addEventListener('change', function() {
+    updatePriceAndTotal(row);
   });
 
-  document.querySelectorAll('.quantity').forEach(input => {
-    input.addEventListener('input', function() {
-      updatePriceAndTotal(input.closest('.item-row'));
-    });
-  });
-
-  document.getElementById('customer_email').addEventListener('input', function() {
-    validateEmailInput(this);
-  });
-
-  document.getElementById('customer_name').addEventListener('input', function() {
-    validateTextInput(this);
-  });
-
-  document.querySelectorAll('.item_name').forEach(dropdown => {
-    dropdown.addEventListener('change', function() {
-      validateDropdown(dropdown);
-    });
-  });
-
-  document.querySelectorAll('.quantity').forEach(input => {
-    input.addEventListener('input', function() {
-      validateQuantity(input);
-    });
+  row.querySelector('.quantity').addEventListener('input', function() {
+    updatePriceAndTotal(row);
   });
 }
 
-function validateEmailInput(input) {
-  const email = input.value;
-  const emailError = document.getElementById('customer_email-error');
-  if (!validateEmail(email)) {
-    emailError.textContent = 'Please enter a valid email address.';
-    emailError.style.display = 'block';
-  } else {
-    emailError.textContent = '';
-    emailError.style.display = 'none';
-  }
-}
-
-function validateTextInput(input) {
-  const errorSpan = document.getElementById(`${input.id}-error`);
-  if (!input.value.trim()) {
-    errorSpan.textContent = 'This field is required.';
-    errorSpan.style.display = 'block';
-  } else {
-    errorSpan.textContent = '';
-    errorSpan.style.display = 'none';
-  }
-}
-
-function validateDropdown(dropdown) {
-  const errorSpan = dropdown.nextElementSibling;
-  if (!dropdown.value) {
-    errorSpan.textContent = 'Please select an item.';
-    errorSpan.style.display = 'block';
-  } else {
-    errorSpan.textContent = '';
-    errorSpan.style.display = 'none';
-  }
-}
-
-function validateQuantity(input) {
-  const errorSpan = input.nextElementSibling;
-  if (!input.value || parseFloat(input.value) <= 0) {
-    errorSpan.textContent = 'Please enter a valid quantity.';
-    errorSpan.style.display = 'block';
-  } else {
-    errorSpan.textContent = '';
-    errorSpan.style.display = 'none';
-  }
-}
-
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return re.test(String(email).toLowerCase());
-}
-
-function showSnackbar(message) {
-  const snackbar = document.getElementById('snackbar');
-  snackbar.textContent = message;
-  snackbar.className = 'show';
-  setTimeout(() => { snackbar.className = snackbar.className.replace('show', ''); }, 3000);
-}
+document.getElementById('add-item-button').addEventListener('click', addItemRow);
 
 window.onload = function() {
-  loadInventory(function() {
-    const initialRow = document.querySelector('.item-row');
-    populateItemDropdown(initialRow.querySelector('.item_name'));
-    addEventListeners();
-    toggleRemoveButtons();
-    updateTotalSummary();
-  });
-  document.getElementById('add-item-button').addEventListener('click', addItemRow);
+  addItemRow(); // Add the initial row
 };
-
- 
